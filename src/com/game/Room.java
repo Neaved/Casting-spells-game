@@ -9,8 +9,8 @@ import java.util.Map;
 import static com.game.Constants.*;
 
 public class Room {
-    private String name;
 
+    private String name;
     private String description;
     private Inventory inventory;
     private Map<String, Room> paths;
@@ -27,28 +27,29 @@ public class Room {
     }
 
     public String getDescription() {
-        StringBuilder description = new StringBuilder();
-        switch (name) {
-            case Constants.LIVING_ROOM_LOC:
-                description.append(Constants.DEFAULT_LIVING_ROOM_DESCRIPTION);
-                break;
-            case Constants.ATTIC_LOC:
-                description.append(Constants.DEFAULT_ATTIC_DESCRIPTION);
-                break;
-            case Constants.GARDEN_LOC:
-                description.append(Constants.DEFAULT_GARDEN_DESCRIPTION);
-                break;
-        }
-        if(inventory.thereIsNotStaticItems()) {
-            description.append(STUFF);
-            description.append(inventory.toString());
-        }
-        this.description = description.toString();
+        StringBuilder description = new StringBuilder(getRoomDescription());
+        setDescription(description.append(getInventoryStuffNames()).toString());
         return this.description;
     }
 
-    public boolean thereIsStaticItems(){
-        return inventory.thereIsStaticItem();
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    private String getRoomDescription() {
+        switch (name) {
+            case LIVING_ROOM_LOC:
+                return DEFAULT_LIVING_ROOM_DESCRIPTION;
+            case ATTIC_LOC:
+                return DEFAULT_ATTIC_DESCRIPTION;
+            case GARDEN_LOC:
+                return DEFAULT_GARDEN_DESCRIPTION;
+        }
+        return EMPTY_STRING;
+    }
+
+    private String getInventoryStuffNames() {
+        return inventory.thereIsNotStaticItems() ? STUFF + inventory.toString() : EMPTY_STRING;
     }
 
     public void addItemToRoomInventory(Item item) {
@@ -59,17 +60,12 @@ public class Room {
         inventory.removeFromInventory(item);
     }
 
-    public Item getItemByName(String itemName) {
-        for (Item item : getRoomInventory()) {
-            if (itemName.equals(item.getName())) {
-                return item;
-            }
-        }
-        return null;
+    public Item getRoomItemByName(String itemName) {
+        return inventory.getItemByName(itemName);
     }
 
-    public ArrayList<Item> getRoomInventory() {
-        return inventory.getInventory();
+    public ArrayList<Item> getRoomInventoryItems() {
+        return inventory.getInventoryItems();
     }
 
     public void addPaths(String direction, Room room) {

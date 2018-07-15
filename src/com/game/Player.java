@@ -5,20 +5,18 @@ import com.game.items.Chain;
 import com.game.items.Item;
 import com.game.items.Wizard;
 
-import java.util.ArrayList;
-
 import static com.game.Constants.*;
 
 public class Player {
 
     private Room room;
-    private Inventory inventory;
+    private Inventory playerInventory;
 
     public Player() {
-        inventory = new Inventory();
+        playerInventory = new Inventory();
     }
 
-    public void goToAnotherRoomCommand(String direction){
+    public void goToAnotherRoomCommand(String direction) {
         Room nextRoom = room.findNextRoom(direction);
         if (nextRoom != null) {
             this.room = nextRoom;
@@ -29,19 +27,27 @@ public class Player {
     }
 
     public void getItemsCommand(String itemName) {
-        if (room.thereIsStaticItems()) {
-            Item item = room.getItemByName(itemName);
-            if (item != null && !item.isStatic()) {
-                replaceItem(item);
-            } else if (item != null && item.isStatic()) {
-                System.out.println(CAN_NOT_TAKE_ACTION + item.getName() + ".");
+        Item item = room.getRoomItemByName(itemName);
+        if (item != null) {
+            if (item.isStatic()) {
+                showCanNotTakeActionMessage(item);
             } else {
-                System.out.println(NO_SUBJECT_ACTION + itemName);
+                replaceItem(item);
             }
+        } else {
+            showNoSubjectActionMessage(itemName);
         }
     }
 
-    private void replaceItem(Item item){
+    private void showCanNotTakeActionMessage(Item item) {
+        System.out.println(CAN_NOT_TAKE_ACTION + item.getName() + DOT_SYMBOL);
+    }
+
+    private void showNoSubjectActionMessage(String itemName) {
+        System.out.println(NO_SUBJECT_ACTION + COMMAS_SYMBOL + itemName + COMMAS_SYMBOL + DOT_SYMBOL);
+    }
+
+    private void replaceItem(Item item) {
         addItemToInventory(item);
         room.removeItemFromRoomInventory(item);
     }
@@ -54,7 +60,7 @@ public class Player {
                 ((Bucket) firstItem).craft(secondItem, room);
                 return secondItem instanceof Wizard && ((Wizard) secondItem).isAwake();
             } else if (firstItem instanceof Chain) {
-                ((Chain) firstItem).craft(secondItem, room, inventory);
+                ((Chain) firstItem).craft(secondItem, room, playerInventory);
                 return false;
             }
         } else {
@@ -66,46 +72,58 @@ public class Player {
 
     private Item getItemByFlag(String itemName, boolean isFirstItem) {
         if (AVAILABLE_FIRST_ITEM.contains(itemName) && isFirstItem) {
-            return getItemByName(itemName);
+            return getItemFromInventoryByName(itemName);
         }
         if (AVAILABLE_SECOND_ITEM.contains(itemName) && !isFirstItem) {
-            if(BUCKET_ITEM_NAME.equals(itemName)) {
-                return getItemByName(itemName);
+            if (BUCKET_ITEM_NAME.equals(itemName)) {
+                return getItemFromInventoryByName(itemName);
             }
-            return room.getItemByName(itemName);
+            return room.getRoomItemByName(itemName);
         }
         return null;
     }
 
-    private Item getItemByName(String itemName) {
-        return inventory.getItem(itemName);
+    private Item getItemFromInventoryByName(String itemName) {
+        return playerInventory.getItemByName(itemName);
     }
 
     public void showInventoryCommand() {
-        for(Item item : getInventory()) {
-            System.out.print(" " + item.getName());
+        if (playerInventory.isEmpty()) {
+            System.out.println(EMPTY_INVENTORY_STUFF);
+        } else {
+            System.out.println(INVENTORY_STUFF + playerInventory.toString());
         }
-        System.out.println();
     }
 
-    private ArrayList<Item> getInventory() {
-        return inventory.getInventory();
-    }
-
-    public String getDescriptionOfCurrentRoomCommand(){
-        return room.getDescription();
+    public void getDescriptionOfCurrentRoomCommand() {
+        System.out.println(room.getDescription());
     }
 
     private void addItemToInventory(Item item) {
-        System.out.println(YOU_HAVE_ACTION + item.getName() + ".");
-        inventory.addToInventory(item);
+        playerInventory.addToInventory(item);
+        System.out.println(YOU_HAVE_ACTION + item.getName() + DOT_SYMBOL);
     }
 
     public void setRoom(Room room) {
         this.room = room;
     }
 
-    public Room fr(){
-        return room;
+    public void showItemDescriptionCommand(String itemName) {
+        Item item = getItemToShow(itemName);
+        if (item != null) {
+            System.out.println(item.getDescription());
+        } else {
+            showNoSubjectActionMessage(itemName);
+        }
     }
+
+    private Item getItemToShow(String itemName) {
+        Item item = getItemFromInventoryByName(itemName);
+        return item == null ? getRoomInventoryByName(itemName) : item;
+    }
+
+    private Item getRoomInventoryByName(String itemName) {
+        return room.getRoomItemByName(itemName);
+    }
+
 }

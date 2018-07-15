@@ -20,4 +20,11 @@ public class Item {
         return isStatic;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

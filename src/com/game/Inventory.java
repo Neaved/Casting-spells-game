@@ -4,6 +4,9 @@ import com.game.items.Item;
 
 import java.util.ArrayList;
 
+import static com.game.Constants.COMMA_AND_SPACE_SYMBOLS;
+import static com.game.Constants.DOT_SYMBOL;
+
 public class Inventory {
 
     private ArrayList<Item> inventory;
@@ -20,21 +23,16 @@ public class Inventory {
         inventory.remove(item);
     }
 
+    public boolean isEmpty() {
+        return inventory.isEmpty();
+    }
+
     public boolean thereIsNotStaticItems() {
         return thereIsNotStaticItem() && !inventory.isEmpty();
     }
 
-    public ArrayList<Item> getInventory() {
+    public ArrayList<Item> getInventoryItems() {
         return inventory;
-    }
-
-    public boolean thereIsStaticItem() {
-        for (Item item : inventory) {
-            if (item.isStatic()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public boolean thereIsNotStaticItem() {
@@ -46,8 +44,7 @@ public class Inventory {
         return false;
     }
 
-    public Item getItem(String itemName) {
-
+    public Item getItemByName(String itemName) {
         for (Item item : inventory) {
             if (item.getName().equals(itemName)) {
                 return item;
@@ -58,16 +55,17 @@ public class Inventory {
 
     @Override
     public String toString() {
-        StringBuilder items = new StringBuilder();
-        if (inventory.size() == 1 && thereIsNotStaticItem()) {
-            items.append(inventory.get(0).getName());
-        } else {
-            for (Item item : inventory) {
-                if (!item.isStatic()) {
-                    items.append(" ").append(item.getName());
-                }
+        return inventory.size() == 1 && thereIsNotStaticItem() ? inventory.get(0).getName() + DOT_SYMBOL : printInventoryStuffNames();
+    }
+
+    private String printInventoryStuffNames() {
+        StringBuilder itemNames = new StringBuilder();
+        for (Item item : inventory) {
+            if (!item.isStatic()) {
+                itemNames.append(item.getName()).append(COMMA_AND_SPACE_SYMBOLS);
             }
         }
-        return items.toString();
+        String itemNamesSt = itemNames.toString();
+        return itemNamesSt.substring(0, itemNamesSt.length() - 2) + DOT_SYMBOL;
     }
 }
