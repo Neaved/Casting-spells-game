@@ -20,6 +20,10 @@ public class Item {
         return isStatic;
     }
 
+    public boolean isNotStatic() {
+        return !isStatic();
+    }
+
     public String getDescription() {
         return description;
     }

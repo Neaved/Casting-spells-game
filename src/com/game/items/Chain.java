@@ -18,11 +18,7 @@ public class Chain extends Item {
     public void craft(Item item, Room room, Inventory playerInventory) {
         if (item instanceof Bucket && ATTIC_LOC.equals(room.getName())) {
             ArrayList<Item> playerInventoryItems = playerInventory.getInventoryItems();
-            Chain chain = getChainFromPlayerInventory(playerInventoryItems);
-
-            if (chain != null) {
-                playerInventoryItems.remove(chain);
-            }
+            playerInventoryItems.remove(getChainFromPlayerInventory(playerInventoryItems));
             ((Bucket) item).setBucketWithChain(true);
             item.setDescription(BUCKET_ITEM_WITH_CHAIN_DESCRIPTION);
             playerInventoryItems.add(item);
@@ -31,11 +27,9 @@ public class Chain extends Item {
     }
 
     private Chain getChainFromPlayerInventory(ArrayList<Item> playerInventoryItems) {
-        for (Item playerItem : playerInventoryItems) {
-            if (CHAIN_ITEM_NAME.equals(playerItem.getName())) {
-                return (Chain) playerItem;
-            }
-        }
-        return null;
+        return (Chain) playerInventoryItems
+                .stream()
+                .filter(playerItem -> CHAIN_ITEM_NAME.equals(playerItem.getName()))
+                .findFirst().get();
     }
 }

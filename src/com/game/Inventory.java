@@ -3,9 +3,9 @@ package com.game;
 import com.game.items.Item;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
-import static com.game.Constants.COMMA_AND_SPACE_SYMBOLS;
-import static com.game.Constants.DOT_SYMBOL;
+import static com.game.Constants.*;
 
 public class Inventory {
 
@@ -36,21 +36,14 @@ public class Inventory {
     }
 
     public boolean thereIsNotStaticItem() {
-        for (Item item : inventory) {
-            if (!item.isStatic()) {
-                return true;
-            }
-        }
-        return false;
+        return inventory.stream().anyMatch(Item::isNotStatic);
     }
 
     public Item getItemByName(String itemName) {
-        for (Item item : inventory) {
-            if (item.getName().equals(itemName)) {
-                return item;
-            }
-        }
-        return null;
+        return inventory
+                .stream()
+                .filter(item -> item.getName().equals(itemName))
+                .findFirst().get();
     }
 
     @Override
@@ -59,13 +52,10 @@ public class Inventory {
     }
 
     private String printInventoryStuffNames() {
-        StringBuilder itemNames = new StringBuilder();
-        for (Item item : inventory) {
-            if (!item.isStatic()) {
-                itemNames.append(item.getName()).append(COMMA_AND_SPACE_SYMBOLS);
-            }
-        }
-        String itemNamesSt = itemNames.toString();
-        return itemNamesSt.substring(0, itemNamesSt.length() - 2) + DOT_SYMBOL;
+        return inventory
+                .stream()
+                .filter(Item::isNotStatic)
+                .map(Item::getName)
+                .collect(Collectors.joining(COMMA_SYMBOL, EMPTY_STRING, DOT_SYMBOL));
     }
 }
